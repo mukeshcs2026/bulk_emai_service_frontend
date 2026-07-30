@@ -1,14 +1,10 @@
-import { Link } from '@tanstack/react-router';
-import {
-  LockOutlined,
-  MailOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import { Button, Card, Form, Input, Typography } from 'antd';
-import { Mails } from 'lucide-react';
-import { useState } from 'react';
-// import {Loader} from "#/components/utils/Loader"
-import {register} from "#/services/auth"
+import { Link } from "@tanstack/react-router";
+import { LockOutlined, MailOutlined, UserOutlined } from "@ant-design/icons";
+import { Button, Card, Form, Input, Typography } from "antd";
+
+import { useRegister } from "#/hooks/auth/userRegister";
+import { tokens } from "../layout/theme";
+import AuthShell from "./AuthShell";
 
 const { Title, Text } = Typography;
 
@@ -21,50 +17,39 @@ interface RegisterForm {
 
 export default function Register() {
   const [form] = Form.useForm<RegisterForm>();
-  const [loading, setLoading] = useState(false)
+  const registerMutation = useRegister();
 
-const onFinish = async (values: RegisterForm) => {
-  try {
-    setLoading(true);
-    
-    console.log(values);
+  const onFinish = (values: RegisterForm) => {
+    registerMutation.mutate(values, {
+      onError: (error: any) => {
+        const errors = error.response?.data?.errors;
 
-    const data = await register(values);
-
-    console.log(data);
-
-    // message.success("Registration successful");
-    // navigate({ to: "/login" });
-  } catch (error) {
-    console.error(error);
-
-    // message.error("Registration failed");
-  } finally {
-    setLoading(false);
-  }
-};
+        form.setFields([
+          { name: "email", errors: errors?.email },
+          { name: "username", errors: errors?.username },
+        ]);
+      },
+    });
+  };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f172a] px-4 py-10">
+    <AuthShell
+      headline="Set up your sending workspace"
+      subtext="One place to manage templates, audiences, and every campaign you send."
+    >
       <Card
-        variant="outlined"
-        className="w-full max-w-md rounded-3xl border border-slate-700 bg-[#1e293b] shadow-2xl"
+        variant="borderless"
+        className="w-full max-w-md rounded-2xl shadow-sm"
+        style={{ border: "1px solid #ECEEF2" }}
       >
-        <div className="mb-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/30">
-            <Mails size={30} className="text-white" />
-          </div>
-
+        <div className="mb-7">
           <Title
-            level={2}
-            style={{ color: 'white', marginTop: 20, marginBottom: 4 }}
+            level={3}
+            style={{ fontFamily: tokens.fontDisplay, marginBottom: 4 }}
           >
-            Create Account
+            Create account
           </Title>
-
-          <Text style={{ color: '#94a3b8' }}>
-            Create your Bulk Email Service account
-          </Text>
+          <Text type="secondary">Start sending with Bulk Mail</Text>
         </div>
 
         <Form
@@ -76,87 +61,62 @@ const onFinish = async (values: RegisterForm) => {
           onFinish={onFinish}
         >
           <Form.Item
-            label={<span className="text-slate-500">Username</span>}
+            label="Username"
             name="username"
-            rules={[
-              {
-                required: true,
-                message: 'Please enter your username',
-              },
-            ]}
+            rules={[{ required: true, message: "Please enter your username" }]}
           >
             <Input
-              prefix={<UserOutlined />}
+              prefix={<UserOutlined className="text-gray-400" />}
               placeholder="Username"
             />
           </Form.Item>
 
           <Form.Item
-            label={<span className="text-slate-500">Email</span>}
+            label="Email"
             name="email"
             rules={[
-              {
-                required: true,
-                message: 'Please enter your email',
-              },
-              {
-                type: 'email',
-                message: 'Please enter a valid email',
-              },
+              { required: true, message: "Please enter your email" },
+              { type: "email", message: "Please enter a valid email" },
             ]}
           >
             <Input
-              prefix={<MailOutlined />}
+              prefix={<MailOutlined className="text-gray-400" />}
               placeholder="john@example.com"
             />
           </Form.Item>
 
           <Form.Item
-            label={<span className="text-slate-500">Password</span>}
+            label="Password"
             name="password"
             hasFeedback
-            rules={[
-              {
-                required: true,
-                message: 'Please enter your password',
-              },
-            ]}
+            rules={[{ required: true, message: "Please enter your password" }]}
           >
             <Input.Password
-              prefix={<LockOutlined />}
+              prefix={<LockOutlined className="text-gray-400" />}
               placeholder="Password"
             />
           </Form.Item>
 
           <Form.Item
-            label={<span className="text-slate-500">Confirm Password</span>}
+            label="Confirm password"
             name="confirm_password"
-            dependencies={['password']}
+            dependencies={["password"]}
             hasFeedback
             rules={[
-              {
-                required: true,
-                message: 'Please confirm your password',
-              },
+              { required: true, message: "Please confirm your password" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (
-                    !value ||
-                    getFieldValue('password') === value
-                  ) {
+                  if (!value || getFieldValue("password") === value) {
                     return Promise.resolve();
                   }
-
-                  return Promise.reject(
-                    new Error('Passwords do not match')
-                  );
+                  return Promise.reject(new Error("Passwords do not match"));
                 },
               }),
             ]}
           >
             <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="Confirm Password"
+              prefix={<LockOutlined className="text-gray-400" />}
+              placeholder="Confirm password"
             />
           </Form.Item>
 
@@ -165,24 +125,25 @@ const onFinish = async (values: RegisterForm) => {
               type="primary"
               htmlType="submit"
               block
-              loading={loading}
+              loading={registerMutation.isPending}
               className="h-11 rounded-xl font-semibold"
             >
-              Create Account
+              Create account
             </Button>
           </Form.Item>
 
-          <div className="text-center text-sm text-slate-400">
-            Already have an account?{' '}
+          <div className="text-center text-sm text-gray-500">
+            Already have an account?{" "}
             <Link
               to="/login"
-              className="font-semibold text-blue-400 hover:text-blue-300"
+              className="font-semibold transition hover:opacity-80"
+              style={{ color: tokens.accent }}
             >
-              Login
+              Log in
             </Link>
           </div>
         </Form>
       </Card>
-    </div>
+    </AuthShell>
   );
 }

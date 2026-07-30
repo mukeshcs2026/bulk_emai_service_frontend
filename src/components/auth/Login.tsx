@@ -1,18 +1,10 @@
-import {useState} from "react"
-import { Link } from '@tanstack/react-router';
-import {
-  LockOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
-import {
-  Button,
-  Checkbox,
-  Form,
-  Input,
-  Typography,
-  Card,
-} from 'antd';
-import { Mails } from 'lucide-react';
+import { Link } from "@tanstack/react-router";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { Button, Checkbox, Form, Input, Typography, Card, message } from "antd";
+
+import { useLogin } from "#/hooks/auth/userLogin";
+import { tokens } from "../layout/theme";
+import AuthShell from "./AuthShell";
 
 const { Title, Text } = Typography;
 
@@ -24,37 +16,35 @@ interface LoginForm {
 
 export default function Login() {
   const [form] = Form.useForm<LoginForm>();
+  const loginMutation = useLogin();
 
   const onFinish = (values: LoginForm) => {
-    console.log(values);
-
+    loginMutation.mutate(values, {
+      onError: (error: any) => {
+        const errors = error.response?.data?.errors;
+        message.error(errors.non_field_errors);
+      },
+    });
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0f172a] px-4 py-10">
+    <AuthShell
+      headline="Send one template. Reach every contact."
+      subtext="Map variables once, import your list, and send with confidence."
+    >
       <Card
-        variant="outlined"
-        className="w-full max-w-md rounded-3xl border border-slate-700 bg-[#1e293b] shadow-2xl"
+        variant="borderless"
+        className="w-full max-w-md rounded-2xl shadow-sm"
+        style={{ border: "1px solid #ECEEF2" }}
       >
-        <div className="mb-8 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/30">
-            <Mails size={30} className="text-white" />
-          </div>
-
+        <div className="mb-7">
           <Title
-            level={2}
-            style={{
-              color: 'white',
-              marginTop: 20,
-              marginBottom: 4,
-            }}
+            level={3}
+            style={{ fontFamily: tokens.fontDisplay, marginBottom: 4 }}
           >
-            Welcome Back
+            Welcome back
           </Title>
-
-          <Text style={{ color: '#94a3b8' }}>
-            Login to your Bulk Email Service account
-          </Text>
+          <Text type="secondary">Log in to your Bulk Mail workspace</Text>
         </div>
 
         <Form
@@ -66,51 +56,38 @@ export default function Login() {
           onFinish={onFinish}
         >
           <Form.Item
-            label={<span className="text-slate-300">Username</span>}
+            label="Username"
             name="username"
-            rules={[
-              {
-                required: true,
-                message: 'Please enter your username',
-              },
-            ]}
+            rules={[{ required: true, message: "Please enter your username" }]}
           >
             <Input
-              prefix={<UserOutlined />}
+              prefix={<UserOutlined className="text-gray-400" />}
               placeholder="Username"
             />
           </Form.Item>
 
           <Form.Item
-            label={<span className="text-slate-300">Password</span>}
+            label="Password"
             name="password"
-            rules={[
-              {
-                required: true,
-                message: 'Please enter your password',
-              },
-            ]}
+            rules={[{ required: true, message: "Please enter your password" }]}
           >
             <Input.Password
-              prefix={<LockOutlined />}
+              prefix={<LockOutlined className="text-gray-400" />}
               placeholder="Password"
             />
           </Form.Item>
 
           <div className="mb-6 flex items-center justify-between">
-            <Form.Item
-              name="remember"
-              valuePropName="checked"
-              noStyle
-            >
+            <Form.Item name="remember" valuePropName="checked" noStyle>
               <Checkbox>Remember me</Checkbox>
             </Form.Item>
 
             <button
               type="button"
-              className="text-sm text-blue-400 transition hover:text-blue-300"
+              className="text-sm font-medium transition hover:opacity-80"
+              style={{ color: tokens.accent }}
             >
-              Forgot Password?
+              Forgot password?
             </button>
           </div>
 
@@ -119,23 +96,25 @@ export default function Login() {
               type="primary"
               htmlType="submit"
               block
+              loading={loginMutation.isPending}
               className="h-11 rounded-xl font-semibold"
             >
-              Sign In
+              Sign in
             </Button>
           </Form.Item>
 
-          <div className="text-center text-sm text-slate-400">
-            Don't have an account?{' '}
+          <div className="text-center text-sm text-gray-500">
+            Don&apos;t have an account?{" "}
             <Link
               to="/register"
-              className="font-semibold text-blue-400 transition hover:text-blue-300"
+              className="font-semibold transition hover:opacity-80"
+              style={{ color: tokens.accent }}
             >
-              Create Account
+              Create account
             </Link>
           </div>
         </Form>
       </Card>
-    </div>
+    </AuthShell>
   );
 }

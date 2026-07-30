@@ -9,6 +9,9 @@ export const API_ENDPOINTS = {
     logout: '/auth/logout/',
     me: '/auth/me/'
   },
+  template:{
+    template: "/template",
+  },
 }
 
 
