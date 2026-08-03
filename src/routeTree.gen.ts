@@ -14,7 +14,9 @@ import { Route as AppRouteRouteImport } from './routes/app/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AppAudienceIndexRouteImport } from './routes/app/audience/index'
+import { Route as AppCampaignsIndexRouteImport } from './routes/app/campaigns/index'
 import { Route as AppDashboardIndexRouteImport } from './routes/app/dashboard/index'
+import { Route as AppTemplatesIndexRouteImport } from './routes/app/templates/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -41,9 +43,19 @@ const AppAudienceIndexRoute = AppAudienceIndexRouteImport.update({
   path: '/audience/',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppCampaignsIndexRoute = AppCampaignsIndexRouteImport.update({
+  id: '/campaigns/',
+  path: '/campaigns/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppTemplatesIndexRoute = AppTemplatesIndexRouteImport.update({
+  id: '/templates/',
+  path: '/templates/',
   getParentRoute: () => AppRouteRoute,
 } as any)
 
@@ -53,7 +65,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/app/audience/': typeof AppAudienceIndexRoute
+  '/app/campaigns/': typeof AppCampaignsIndexRoute
   '/app/dashboard/': typeof AppDashboardIndexRoute
+  '/app/templates/': typeof AppTemplatesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,7 +75,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/app/audience': typeof AppAudienceIndexRoute
+  '/app/campaigns': typeof AppCampaignsIndexRoute
   '/app/dashboard': typeof AppDashboardIndexRoute
+  '/app/templates': typeof AppTemplatesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,14 +86,31 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/app/audience/': typeof AppAudienceIndexRoute
+  '/app/campaigns/': typeof AppCampaignsIndexRoute
   '/app/dashboard/': typeof AppDashboardIndexRoute
+  '/app/templates/': typeof AppTemplatesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/app' | '/login' | '/register' | '/app/audience/' | '/app/dashboard/'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/register'
+    | '/app/audience/'
+    | '/app/campaigns/'
+    | '/app/dashboard/'
+    | '/app/templates/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app' | '/login' | '/register' | '/app/audience' | '/app/dashboard'
+  to:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/register'
+    | '/app/audience'
+    | '/app/campaigns'
+    | '/app/dashboard'
+    | '/app/templates'
   id:
     | '__root__'
     | '/'
@@ -85,7 +118,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/app/audience/'
+    | '/app/campaigns/'
     | '/app/dashboard/'
+    | '/app/templates/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +167,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAudienceIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/campaigns/': {
+      id: '/app/campaigns/'
+      path: '/campaigns'
+      fullPath: '/app/campaigns/'
+      preLoaderRoute: typeof AppCampaignsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/app/dashboard/': {
       id: '/app/dashboard/'
       path: '/dashboard'
@@ -139,17 +181,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardIndexRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/app/templates/': {
+      id: '/app/templates/'
+      path: '/templates'
+      fullPath: '/app/templates/'
+      preLoaderRoute: typeof AppTemplatesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
 interface AppRouteRouteChildren {
   AppAudienceIndexRoute: typeof AppAudienceIndexRoute
+  AppCampaignsIndexRoute: typeof AppCampaignsIndexRoute
   AppDashboardIndexRoute: typeof AppDashboardIndexRoute
+  AppTemplatesIndexRoute: typeof AppTemplatesIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAudienceIndexRoute: AppAudienceIndexRoute,
+  AppCampaignsIndexRoute: AppCampaignsIndexRoute,
   AppDashboardIndexRoute: AppDashboardIndexRoute,
+  AppTemplatesIndexRoute: AppTemplatesIndexRoute,
 }
 
 const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(

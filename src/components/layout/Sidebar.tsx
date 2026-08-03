@@ -19,15 +19,15 @@ interface SidebarProps {
 
 // Centralize nav config so header breadcrumbs / page titles can reuse it later.
 const NAV_ITEMS = [
-  { key: "/dashboard", label: "Dashboard", icon: <DashboardOutlined /> },
-  { key: "/campaigns", label: "Campaigns", icon: <SendOutlined /> },
+  { key: "/app/dashboard", label: "Dashboard", icon: <DashboardOutlined /> },
+  { key: "/app/templates", label: "Templates", icon: <FileTextOutlined /> },
   { key: "/app/audience", label: "Audience", icon: <TeamOutlined /> },
-  { key: "/templates", label: "Templates", icon: <FileTextOutlined /> },
-  { key: "/analytics", label: "Analytics", icon: <BarChartOutlined /> },
+  { key: "/app/campaigns", label: "Campaigns", icon: <SendOutlined /> },
+  //   { key: "/analytics", label: "Analytics", icon: <BarChartOutlined /> },
 ];
 
 const FOOTER_ITEMS = [
-  { key: "/settings", label: "Settings", icon: <SettingOutlined /> },
+  { key: "/app/settings", label: "Settings", icon: <SettingOutlined /> },
 ];
 
 export default function Sidebar({ collapsed }: SidebarProps) {
