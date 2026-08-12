@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Button, Form, Modal, Progress, Typography, Upload } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-import { Button, Form, Modal, Typography, Upload, Progress } from "antd";
-import { useUploadAudience } from "#/hooks/audience/useUploadAudience";
-import { useState, useEffect } from "react";
 
-import { tokens } from "#/components/layout/theme";
+import { useUploadAudience } from "#/hooks/audience/useUploadAudience";
 import { useJobStatus } from "#/hooks/audience/useJobStatus";
+import { tokens } from "#/components/layout/theme";
 
 const { Title, Text } = Typography;
 const { Dragger } = Upload;
@@ -22,34 +23,88 @@ export default function UploadAudienceModal({
 
   const [jobId, setJobId] = useState<number | null>(null);
 
+  const queryClient = useQueryClient();
+
   const { mutate, isPending } = useUploadAudience();
+
   const { data: job } = useJobStatus(jobId);
 
-  useEffect(() => {
-    if (!job) return;
+  /*
+   * Calculate progress from the job data.
+   *
+   * Example:
+   * processed_items = 3150
+   * total_items = 6300
+   *
+   * progress = 50%
+   */
+  const progress =
+    job && job.total_items > 0
+      ? Math.round((job.processed_items / job.total_items) * 100)
+      : 0;
 
+  /*
+   * Watch the Celery job status.
+   */
+  useEffect(() => {
+    if (!job) {
+      return;
+    }
+
+    /*
+     * Celery finished successfully.
+     *
+     * At this point the Audience object has its
+     * final headers and total_rows.
+     */
     if (job.status === "success") {
+      /*
+       * Tell TanStack Query that the cached audience
+       * list is now stale.
+       *
+       * This causes useAudiences() to fetch the
+       * updated audience list.
+       */
+      queryClient.invalidateQueries({
+        queryKey: ["audiences"],
+      });
+
       form.resetFields();
       setJobId(null);
+
       onCancel();
     }
+  }, [job, queryClient, form, onCancel]);
 
-    if (job.status === "failed") {
-      setJobId(null);
-    }
-  }, [job, form, onCancel]);
-
-  // console.log(job?.progress);
-
+  /*
+   * Called when the user submits the upload form.
+   */
   const handleFinish = (values: any) => {
-    console.log(values);
     const file = values.csv_file[0].originFileObj;
 
     mutate(file, {
       onSuccess: (response) => {
+        /*
+         * The upload API returns the Celery job ID.
+         *
+         * Setting jobId enables useJobStatus(jobId),
+         * which starts polling the job API.
+         */
         setJobId(response.job_id);
       },
     });
+  };
+
+  /*
+   * Cancel handler.
+   *
+   * If there is an active job, we remove the job ID
+   * from this component's state.
+   */
+  const handleCancel = () => {
+    setJobId(null);
+    form.resetFields();
+    onCancel();
   };
 
   return (
@@ -58,7 +113,7 @@ export default function UploadAudienceModal({
       centered
       open={open}
       footer={null}
-      onCancel={onCancel}
+      onCancel={handleCancel}
       width={{
         xs: "95%",
         sm: "85%",
@@ -86,7 +141,14 @@ export default function UploadAudienceModal({
           selected while creating email campaigns.
         </Text>
 
-        {jobId === null ? (
+        {/*
+         * ============================================================
+         * UPLOAD FORM
+         * ============================================================
+         *
+         * Show this when there is no active Celery job.
+         */}
+        {jobId === null && (
           <Form
             layout="vertical"
             form={form}
@@ -149,24 +211,79 @@ export default function UploadAudienceModal({
                 marginTop: 24,
               }}
             >
-              <Button onClick={onCancel}>Cancel</Button>
+              <Button onClick={handleCancel}>Cancel</Button>
 
               <Button type="primary" htmlType="submit" loading={isPending}>
                 Upload Audience
               </Button>
             </div>
           </Form>
-        ) : (
+        )}
+
+        {/*
+         * ============================================================
+         * PROGRESS UI
+         * ============================================================
+         *
+         * Show this after the upload API returns a job_id.
+         */}
+        {jobId !== null && (
           <div
             style={{
               marginTop: 32,
             }}
           >
-            {/* Progress UI */}
-            <Progress
-              percent={job?.progress ?? 0}
-              status={job?.status === "success" ? "success" : "active"}
-            />
+            <Title level={5}>Importing Audience</Title>
+
+            <Text type="secondary">
+              Please wait while your audience is being processed.
+            </Text>
+
+            <div
+              style={{
+                marginTop: 24,
+              }}
+            >
+              <Progress
+                percent={progress}
+                status={
+                  job?.status === "failed"
+                    ? "exception"
+                    : job?.status === "success"
+                      ? "success"
+                      : "active"
+                }
+              />
+            </div>
+
+            {job && (
+              <div
+                style={{
+                  marginTop: 12,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text type="secondary">
+                  {job.processed_items ?? 0} / {job.total_items ?? 0} rows
+                  processed
+                </Text>
+
+                <Text type="secondary">{progress}%</Text>
+              </div>
+            )}
+
+            {job?.status === "failed" && (
+              <Text
+                type="danger"
+                style={{
+                  display: "block",
+                  marginTop: 16,
+                }}
+              >
+                Audience import failed. Please try uploading the file again.
+              </Text>
+            )}
           </div>
         )}
       </div>

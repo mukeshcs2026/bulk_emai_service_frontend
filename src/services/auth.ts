@@ -2,6 +2,12 @@
 import api, { API_ENDPOINTS } from './api'
 
 
+export interface CurrentUser {
+  username: string;
+  email: string;
+  role: string;
+}
+
 interface RegisterPayload {
   username: string;
   email: string;
@@ -29,4 +35,9 @@ export async function logoutUser() {
   const response = await api.post(API_ENDPOINTS.auth.logout)
 
   return response.data
+}
+export async function getCurrentUser(): Promise<CurrentUser> {
+  const response = await api.get(API_ENDPOINTS.auth.me);
+
+  return response.data.data;
 }

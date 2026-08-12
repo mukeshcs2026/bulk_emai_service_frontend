@@ -10,7 +10,8 @@ export const API_ENDPOINTS = {
     me: '/auth/me/'
   },
   template:{
-    template: "/template/",
+    templates: "/template/",
+    templateById: "/template/"
   },
   audience:{
     audiences:"/audiences/",
@@ -21,8 +22,8 @@ export const API_ENDPOINTS = {
     status:"/jobs/"
   },
   campaign:{
-    campaign: "/campaign",
-    create: "/campaign/create"
+    campaign: "/campaign/",
+    create: "/campaign/create/"
   }
 }
 

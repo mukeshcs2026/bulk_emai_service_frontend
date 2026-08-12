@@ -1,12 +1,6 @@
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  UserOutlined,
-  BellOutlined,
-} from "@ant-design/icons";
+import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import {
   Avatar,
-  Badge,
   Breadcrumb,
   Button,
   Dropdown,
@@ -14,7 +8,10 @@ import {
   Space,
   Typography,
 } from "antd";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+
+import { useCurrentUser } from "#/hooks/auth/useCurrentUser";
+import { useLogout } from "#/hooks/auth/useLogout";
 
 import { tokens } from "./theme";
 
@@ -24,9 +21,6 @@ const { Text } = Typography;
 interface HeaderBarProps {
   collapsed: boolean;
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
-  userName?: string;
-  /** Count of Celery jobs currently running (audience imports, campaign sends). */
-  activeJobCount?: number;
 }
 
 const LABELS: Record<string, string> = {
@@ -38,13 +32,13 @@ const LABELS: Record<string, string> = {
   settings: "Settings",
 };
 
-export default function HeaderBar({
-  collapsed,
-  setCollapsed,
-  userName = "Mukesh",
-  activeJobCount = 0,
-}: HeaderBarProps) {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+export default function HeaderBar({ collapsed, setCollapsed }: HeaderBarProps) {
+  const navigate = useNavigate();
+
+  const pathname = useRouterState({
+    select: (s) => s.location.pathname,
+  });
+
   const segments = pathname.split("/").filter(Boolean);
 
   const breadcrumbItems = segments.map((seg, i) => ({
@@ -58,14 +52,30 @@ export default function HeaderBar({
       ),
   }));
 
-  const userMenuItems = [
-    { key: "profile", label: "Profile" },
-    { key: "settings", label: "Settings" },
-    { type: "divider" as const },
-    { key: "logout", danger: true, label: "Log out" },
-  ];
+  // Current logged-in user
+  const { data: user, isLoading: userLoading } = useCurrentUser();
 
-  const hasActiveJobs = activeJobCount > 0;
+  // Logout mutation
+  const { mutate: logout, isPending: logoutPending } = useLogout();
+
+  const handleLogout = () => {
+    logout(undefined, {
+      onSuccess: () => {
+        navigate({
+          to: "/login",
+        });
+      },
+    });
+  };
+
+  const userMenuItems = [
+    {
+      key: "logout",
+      danger: true,
+      label: logoutPending ? "Logging out..." : "Log out",
+      disabled: logoutPending,
+    },
+  ];
 
   return (
     <Header
@@ -79,13 +89,18 @@ export default function HeaderBar({
         gap: 16,
       }}
     >
+      {/* Left side */}
       <Space size={16} align="center">
         <Button
           type="text"
           icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           onClick={() => setCollapsed(!collapsed)}
-          style={{ width: 36, height: 36 }}
+          style={{
+            width: 36,
+            height: 36,
+          }}
         />
+
         <Breadcrumb
           items={
             breadcrumbItems.length ? breadcrumbItems : [{ title: "Dashboard" }]
@@ -93,88 +108,51 @@ export default function HeaderBar({
         />
       </Space>
 
-      <Space size={20} align="center">
-        {/* Live job-activity indicator: pulses while a Celery task (import/send) is running */}
-        <Link
-          to="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 12px",
-            borderRadius: 999,
-            background: hasActiveJobs ? tokens.accentSoft : "transparent",
-            border: `1px solid ${hasActiveJobs ? tokens.accent : "#E5E7EB"}`,
-          }}
-        >
-          <span
-            style={{
-              position: "relative",
-              display: "inline-flex",
-              width: 8,
-              height: 8,
-            }}
-          >
-            <span
-              style={{
-                position: "absolute",
-                inset: 0,
-                borderRadius: "50%",
-                background: hasActiveJobs ? tokens.accent : "#9CA3AF",
-                animation: hasActiveJobs
-                  ? "job-pulse 1.4s ease-out infinite"
-                  : "none",
-              }}
-            />
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: hasActiveJobs ? tokens.accent : "#9CA3AF",
-              }}
-            />
-          </span>
-          <Text style={{ fontFamily: tokens.fontMono, fontSize: 12.5 }}>
-            {hasActiveJobs
-              ? `${activeJobCount} job${activeJobCount > 1 ? "s" : ""} running`
-              : "No active jobs"}
-          </Text>
-        </Link>
-
-        <Badge count={0} size="small">
-          <Button
-            type="text"
-            icon={<BellOutlined />}
-            style={{ width: 36, height: 36 }}
-          />
-        </Badge>
-
+      {/* Right side */}
+      {!userLoading && user && (
         <Dropdown
-          menu={{ items: userMenuItems }}
+          menu={{
+            items: userMenuItems,
+            onClick: ({ key }) => {
+              if (key === "logout") {
+                handleLogout();
+              }
+            },
+          }}
           placement="bottomRight"
           trigger={["click"]}
         >
-          <Space style={{ cursor: "pointer" }}>
+          <Space
+            style={{
+              cursor: "pointer",
+            }}
+          >
             <Avatar
               size={32}
-              icon={<UserOutlined />}
-              style={{ background: tokens.accent }}
-            />
-            <Text strong style={{ fontFamily: tokens.fontDisplay }}>
-              {userName}
-            </Text>
+              style={{
+                background: tokens.accent,
+              }}
+            >
+              {user.username.charAt(0).toUpperCase()}
+            </Avatar>
+
+            <div
+              style={{
+                lineHeight: 1.2,
+              }}
+            >
+              <Text
+                strong
+                style={{
+                  fontFamily: tokens.fontDisplay,
+                }}
+              >
+                {user.username}
+              </Text>
+            </div>
           </Space>
         </Dropdown>
-      </Space>
-
-      <style>{`
-        @keyframes job-pulse {
-          0% { transform: scale(1); opacity: 0.6; }
-          70% { transform: scale(2.4); opacity: 0; }
-          100% { transform: scale(2.4); opacity: 0; }
-        }
-      `}</style>
+      )}
     </Header>
   );
 }

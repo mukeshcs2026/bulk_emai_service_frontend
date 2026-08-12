@@ -5,26 +5,18 @@ import { Outlet } from "@tanstack/react-router";
 import Sidebar from "./Sidebar";
 import HeaderBar from "./HeaderBar";
 import { tokens } from "./theme";
-// Swap for your real hook, e.g. a react-query poll against GET /tasks?status=running
-// import { useActiveJobCount } from "../hooks/useActiveJobCount";
 
 const { Content } = Layout;
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
-  // const activeJobCount = useActiveJobCount();
-  const activeJobCount = 0;
 
   return (
     <Layout style={{ minHeight: "100vh", background: tokens.canvas }}>
       <Sidebar collapsed={collapsed} />
 
       <Layout>
-        <HeaderBar
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-          activeJobCount={activeJobCount}
-        />
+        <HeaderBar collapsed={collapsed} setCollapsed={setCollapsed} />
 
         <Content
           style={{
