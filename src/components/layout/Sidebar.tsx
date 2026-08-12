@@ -87,7 +87,12 @@ export default function Sidebar({ collapsed }: SidebarProps) {
             justifyContent: "center",
           }}
         >
-          <SendOutlined style={{ color: "#fff", fontSize: 15 }} />
+          <SendOutlined
+            style={{
+              color: tokens.ink,
+              fontSize: 15,
+            }}
+          />
         </div>
         {!collapsed && (
           <span

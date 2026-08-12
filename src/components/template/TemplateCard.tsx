@@ -20,160 +20,171 @@ export default function TemplateCard({
       hoverable
       styles={{
         body: {
-          padding: 20,
+          padding: 0,
         },
       }}
       style={{
         height: "100%",
+        overflow: "hidden",
         background: tokens.surface,
         border: `1px solid ${tokens.border}`,
         borderRadius: 14,
-        overflow: "hidden",
-        boxShadow: "0 2px 8px rgba(18, 23, 43, 0.04)",
+        boxShadow: "0 1px 3px rgba(16, 24, 40, 0.06)",
+        transition: "all 0.2s ease",
       }}
     >
-      <Space
-        orientation="vertical"
-        size={20}
+      {/* Header */}
+      <div
         style={{
-          width: "100%",
+          padding: "18px 20px",
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
         }}
       >
-        {/* Header */}
+        <div
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: 10,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: tokens.accentSoft,
+            color: tokens.accent,
+            flexShrink: 0,
+          }}
+        >
+          <MailOutlined style={{ fontSize: 18 }} />
+        </div>
 
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
+            minWidth: 0,
+            flex: 1,
           }}
         >
-          <div
+          <Title
+            level={5}
+            ellipsis
             style={{
-              width: 42,
-              height: 42,
-              borderRadius: 11,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              background: tokens.accentSoft,
-              color: tokens.accent,
-              flexShrink: 0,
+              margin: 0,
+              color: tokens.ink,
+              fontFamily: tokens.fontDisplay,
+              fontWeight: 600,
             }}
           >
-            <MailOutlined style={{ fontSize: 18 }} />
-          </div>
+            {template.template_name}
+          </Title>
 
-          <div
+          <Text
+            type="secondary"
             style={{
-              minWidth: 0,
-              flex: 1,
+              fontSize: 12,
             }}
           >
-            <Title
-              level={5}
-              ellipsis
-              style={{
-                margin: 0,
-                color: tokens.ink,
-                fontFamily: tokens.fontDisplay,
-              }}
-            >
-              {template.template_name}
-            </Title>
+            Email template
+          </Text>
+        </div>
+      </div>
 
+      {/* Content */}
+      <div
+        style={{
+          margin: "0 10px",
+          padding: 16,
+          background: tokens.surface,
+          borderRadius: 10,
+        }}
+      >
+        <Space
+          orientation="vertical"
+          size={18}
+          style={{
+            width: "100%",
+          }}
+        >
+          {/* Subject */}
+          <div>
             <Text
               type="secondary"
               style={{
-                fontSize: 12,
+                display: "block",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+                marginBottom: 6,
               }}
             >
-              Email template
+              SUBJECT
+            </Text>
+
+            <Text
+              ellipsis={{
+                tooltip: template.subject,
+              }}
+              style={{
+                display: "block",
+                color: tokens.ink,
+                fontWeight: 500,
+                lineHeight: 1.5,
+              }}
+            >
+              {template.subject}
             </Text>
           </div>
-        </div>
 
-        {/* Divider */}
+          {/* Variables */}
+          <div>
+            <Text
+              type="secondary"
+              style={{
+                display: "block",
+                fontSize: 11,
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+                marginBottom: 8,
+              }}
+            >
+              VARIABLES
+            </Text>
 
-        <div
-          style={{
-            height: 1,
-            background: tokens.border,
-          }}
-        />
+            {template.variables.length > 0 ? (
+              <Space wrap size={[6, 6]}>
+                {template.variables.map((variable) => (
+                  <Tag
+                    key={variable}
+                    style={{
+                      margin: 0,
+                      padding: "3px 7px",
+                      borderRadius: 6,
+                      border: `1px solid ${tokens.accentSoft}`,
+                      background: tokens.accentSoft,
+                      color: tokens.accent,
+                      fontFamily: tokens.fontMono,
+                      fontSize: 11,
+                    }}
+                  >
+                    {`{{ ${variable} }}`}
+                  </Tag>
+                ))}
+              </Space>
+            ) : (
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                No variables
+              </Text>
+            )}
+          </div>
+        </Space>
+      </div>
 
-        {/* Subject */}
-
-        <div>
-          <Text
-            type="secondary"
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "0.04em",
-              display: "block",
-              marginBottom: 7,
-            }}
-          >
-            SUBJECT
-          </Text>
-
-          <Text
-            ellipsis={{
-              tooltip: template.subject,
-            }}
-            style={{
-              display: "block",
-              fontWeight: 500,
-              color: tokens.ink,
-              lineHeight: 1.5,
-            }}
-          >
-            {template.subject}
-          </Text>
-        </div>
-
-        {/* Variables */}
-
-        <div>
-          <Text
-            type="secondary"
-            style={{
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: "0.04em",
-              display: "block",
-              marginBottom: 9,
-            }}
-          >
-            VARIABLES
-          </Text>
-
-          <Space wrap size={[6, 6]}>
-            {template.variables.map((variable) => (
-              <Tag
-                key={variable}
-                style={{
-                  margin: 0,
-                  borderRadius: 6,
-                  border: `1px solid ${tokens.accentSoft}`,
-                  background: tokens.accentSoft,
-                  color: tokens.accent,
-                  padding: "4px 8px",
-                  fontFamily: tokens.fontMono,
-                  fontSize: 11,
-                }}
-              >
-                {`{{ ${variable} }}`}
-              </Tag>
-            ))}
-          </Space>
-        </div>
-
-        {/* Preview Button */}
-
+      {/* Footer */}
+      <div
+        style={{
+          padding: "14px 20px 18px",
+        }}
+      >
         <Button
-          type="default"
           block
           icon={<EyeOutlined />}
           onClick={() => onPreview(template)}
@@ -181,13 +192,14 @@ export default function TemplateCard({
             height: 40,
             borderRadius: 9,
             fontWeight: 500,
-            borderColor: tokens.border,
+            borderColor: tokens.borderStrong ?? tokens.border,
             color: tokens.ink,
+            background: tokens.surfaceSoft,
           }}
         >
           Preview Template
         </Button>
-      </Space>
+      </div>
     </Card>
   );
 }

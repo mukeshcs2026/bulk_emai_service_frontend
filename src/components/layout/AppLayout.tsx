@@ -22,8 +22,8 @@ export default function AppLayout() {
           style={{
             margin: 20,
             padding: 24,
-            background: tokens.surface,
-            borderRadius: 14,
+            background: tokens.canvas,
+            borderRadius: 10,
             minHeight: "calc(100vh - 64px - 40px)",
           }}
         >
