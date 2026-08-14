@@ -1,36 +1,36 @@
-import axios from "axios"
+import axios from "axios";
 
-export const API_BASE_URL = 'http://localhost:8000/api'
+export const API_BASE_URL = "http://localhost:8000/api";
 
 export const API_ENDPOINTS = {
   auth: {
-    login: '/auth/login/',
-    register: '/auth/register/',
-    logout: '/auth/logout/',
-    me: '/auth/me/'
+    login: "/auth/login/",
+    register: "/auth/register/",
+    logout: "/auth/logout/",
+    me: "/auth/me/",
   },
-  template:{
+  template: {
     templates: "/template/",
-    templateById: "/template/"
+    templateById: "/template/",
   },
-  audience:{
-    audiences:"/audiences/",
-    upload:"/audiences/upload/",
-    audienceById:"/audiences/"
+  audience: {
+    audiences: "/audiences/",
+    upload: "/audiences/upload/",
+    audienceById: "/audiences/",
   },
-  jobs:{
-    status:"/jobs/"
+  jobs: {
+    status: "/jobs/",
   },
-  campaign:{
+  campaign: {
     campaign: "/campaign/",
-    create: "/campaign/create/"
-  }
-}
-
+    create: "/campaign/create/",
+    sendMail: (campaignId: number) => `/campaign/${campaignId}/send/`,
+  },
+};
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-})
+});
 
-export default api
+export default api;

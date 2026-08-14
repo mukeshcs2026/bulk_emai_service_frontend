@@ -1,13 +1,32 @@
-import { Button, Form, Input, Modal, Select, Typography } from "antd";
 import { useState } from "react";
 
-import { useTemplates } from "#/hooks/template/useTemplates";
-import { useTemplate } from "#/hooks/template/useTemplate";
+import {
+  CheckCircleOutlined,
+  FileTextOutlined,
+  SendOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  Modal,
+  Select,
+  Space,
+  Tag,
+  Typography,
+} from "antd";
 
-import { useAudiences } from "#/hooks/audience/useAudiences";
+import { tokens } from "#/components/layout/theme";
+
 import { useAudience } from "#/hooks/audience/useAudience";
+import { useAudiences } from "#/hooks/audience/useAudiences";
 
 import { useCreateCampaign } from "#/hooks/campaign/useCreateCampaign";
+
+import { useTemplate } from "#/hooks/template/useTemplate";
+import { useTemplates } from "#/hooks/template/useTemplates";
 
 import type { CreateCampaignPayload } from "#/services/campaign";
 
@@ -32,49 +51,19 @@ export default function CreateCampaignModal({
     null,
   );
 
-  /*
-   * Get templates for the dropdown.
-   */
   const { data: templates = [], isLoading: templatesLoading } = useTemplates();
 
-  /*
-   * Once a template is selected, fetch its full details.
-   *
-   * This gives us:
-   * - subject
-   * - preview
-   * - variables
-   */
   const { data: selectedTemplate, isLoading: templateLoading } =
     useTemplate(selectedTemplateId);
 
-  /*
-   * Get audiences for the dropdown.
-   */
   const { data: audiences = [], isLoading: audiencesLoading } = useAudiences();
 
-  /*
-   * Once an audience is selected, fetch its full details.
-   *
-   * This gives us:
-   * - headers
-   * - total_rows
-   * - etc.
-   */
   const { data: selectedAudience, isLoading: audienceLoading } =
     useAudience(selectedAudienceId);
 
-  /*
-   * Campaign creation mutation.
-   */
   const { mutate, isPending } = useCreateCampaign();
 
-  /*
-   * Submit campaign.
-   */
   const handleFinish = (values: CreateCampaignPayload) => {
-    console.log("Campaign payload:", values);
-
     mutate(values, {
       onSuccess: () => {
         form.resetFields();
@@ -87,9 +76,6 @@ export default function CreateCampaignModal({
     });
   };
 
-  /*
-   * When modal is closed manually, reset the local state as well.
-   */
   const handleCancel = () => {
     form.resetFields();
 
@@ -101,34 +87,95 @@ export default function CreateCampaignModal({
 
   return (
     <Modal
-      title="Create Campaign"
       centered
       open={open}
       onCancel={handleCancel}
       footer={null}
-      width={750}
+      width={760}
+      title={
+        <div>
+          <Space size={tokens.spaceMD}>
+            <div
+              style={{
+                width: 34,
+                height: 34,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+
+                borderRadius: tokens.radiusMD,
+
+                background: tokens.accentSoft,
+                color: tokens.accent,
+              }}
+            >
+              <SendOutlined />
+            </div>
+
+            <div>
+              <Text
+                strong
+                style={{
+                  display: "block",
+                  fontFamily: tokens.fontDisplay,
+                  fontSize: 16,
+                  color: tokens.ink,
+                }}
+              >
+                Create campaign
+              </Text>
+
+              <Text
+                style={{
+                  display: "block",
+                  marginTop: 2,
+                  color: tokens.inkMuted,
+                  fontSize: 12,
+                  fontWeight: 400,
+                }}
+              >
+                Configure your email campaign
+              </Text>
+            </div>
+          </Space>
+        </div>
+      }
     >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
-        {/* =========================
-            Campaign Name
-        ========================== */}
+        {/* =====================================================
+            Campaign Details
+        ===================================================== */}
 
-        <Form.Item
-          label="Campaign Name"
-          name="name"
-          rules={[
-            {
-              required: true,
-              message: "Please enter a campaign name.",
-            },
-          ]}
+        <div
+          style={{
+            marginTop: tokens.spaceLG,
+          }}
         >
-          <Input placeholder="e.g. Welcome Campaign" />
-        </Form.Item>
+          <Form.Item
+            label="Campaign name"
+            name="name"
+            rules={[
+              {
+                required: true,
+                message: "Please enter a campaign name.",
+              },
+            ]}
+          >
+            <Input placeholder="e.g. Welcome Campaign" />
+          </Form.Item>
+        </div>
 
-        {/* =========================
+        <Divider />
+
+        {/* =====================================================
             Template
-        ========================== */}
+        ===================================================== */}
+
+        <SectionHeader
+          icon={<FileTextOutlined />}
+          title="Email template"
+          description="Choose the template that will be used for this campaign."
+        />
 
         <Form.Item
           label="Template"
@@ -150,50 +197,103 @@ export default function CreateCampaignModal({
             onChange={(value) => {
               setSelectedTemplateId(value);
 
-              /*
-               * The variables may have changed,
-               * so remove the previous mapping.
-               */
               form.setFieldValue("variable_mapping", {});
             }}
           />
         </Form.Item>
 
-        {/* =========================
-            Template Loading
-        ========================== */}
+        {/* Template loading */}
 
         {selectedTemplateId && templateLoading && (
-          <Text type="secondary">Loading template...</Text>
+          <LoadingMessage>Loading template details...</LoadingMessage>
         )}
 
-        {/* Template Preview */}
+        {/* =====================================================
+            Template Preview
+        ===================================================== */}
 
         {selectedTemplate && (
           <div
             style={{
-              marginBottom: 24,
+              marginTop: tokens.spaceLG,
+              marginBottom: tokens.spaceLG,
             }}
           >
-            <Title level={5}>Template Preview</Title>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: tokens.spaceSM,
+              }}
+            >
+              <Text
+                strong
+                style={{
+                  color: tokens.ink,
+                  fontSize: 22,
+                }}
+              >
+                Template preview
+              </Text>
 
-            <Text type="secondary">{selectedTemplate.subject}</Text>
+              <Tag
+                style={{
+                  margin: 0,
+                  border: `1px solid ${tokens.infoBorder}`,
+                  background: tokens.infoSoft,
+                  color: tokens.accent,
+                  borderRadius: tokens.radiusSM,
+                }}
+              >
+                Preview
+              </Tag>
+            </div>
+
+            <Text
+              style={{
+                display: "block",
+                marginBottom: tokens.spaceSM,
+                color: tokens.inkMuted,
+                fontSize: 15,
+              }}
+            >
+              {selectedTemplate.subject}
+            </Text>
 
             <div
               style={{
-                marginTop: 16,
-                border: "1px solid #e5e7eb",
-                borderRadius: 8,
                 overflow: "hidden",
-                background: "#fff",
+
+                border: `1px solid ${tokens.border}`,
+                borderRadius: tokens.radiusLG,
+
+                background: tokens.surface,
+
+                boxShadow: tokens.shadowSm,
               }}
             >
               <iframe
                 title="Email Template Preview"
-                srcDoc={selectedTemplate.preview}
+                srcDoc={`
+                      <style>
+                        body {
+                          font-family: Arial, sans-serif !important;
+                          font-size: 13px !important;
+                        }
+
+                        p, div, span, td, th {
+                          font-size: 15px !important;
+                          padding-left: 15px;
+                        }
+                      </style>
+
+                      ${selectedTemplate.preview}
+                    `}
                 style={{
+                  display: "block",
                   width: "100%",
-                  height: 250,
+                  height: 200,
                   border: "none",
                 }}
               />
@@ -201,47 +301,81 @@ export default function CreateCampaignModal({
           </div>
         )}
 
-        {/* =========================
+        {/* =====================================================
             Template Variables
-        ========================== */}
+        ===================================================== */}
 
-        {selectedTemplate && (
+        {selectedTemplate && selectedTemplate.variables.length > 0 && (
           <div
             style={{
-              marginBottom: 24,
+              padding: tokens.spaceLG,
+
+              border: `1px solid ${tokens.border}`,
+              borderRadius: tokens.radiusLG,
+
+              background: tokens.surfaceSubtle,
             }}
           >
-            <Title level={5}>Template Variables</Title>
-
-            <Text type="secondary">
-              These variables will be mapped to columns from your audience.
-            </Text>
-
-            <div
+            <Text
+              strong
               style={{
-                marginTop: 12,
+                display: "block",
+                marginBottom: tokens.spaceXS,
+                color: tokens.ink,
+                fontSize: 22,
               }}
             >
+              Template variables
+            </Text>
+
+            <Text
+              style={{
+                display: "block",
+                marginBottom: tokens.spaceMD,
+                color: tokens.inkMuted,
+                fontSize: 13,
+              }}
+            >
+              These values will be populated from columns in your audience.
+            </Text>
+
+            <Space wrap size={[tokens.spaceXS, tokens.spaceXS]}>
               {selectedTemplate.variables.map((variable) => (
-                <div
+                <Tag
                   key={variable}
                   style={{
-                    padding: "8px 12px",
-                    marginBottom: 8,
-                    border: "1px solid #e5e7eb",
-                    borderRadius: 6,
+                    margin: 0,
+
+                    border: `1px solid ${tokens.border}`,
+                    borderRadius: tokens.radiusSM,
+
+                    background: tokens.surface,
+                    color: tokens.inkSecondary,
+
+                    padding: "4px 9px",
+
+                    fontFamily: tokens.fontMono,
+                    fontSize: 12,
                   }}
                 >
                   {`{{ ${variable} }}`}
-                </div>
+                </Tag>
               ))}
-            </div>
+            </Space>
           </div>
         )}
 
-        {/* =========================
+        <Divider />
+
+        {/* =====================================================
             Audience
-        ========================== */}
+        ===================================================== */}
+
+        <SectionHeader
+          icon={<TeamOutlined />}
+          title="Audience"
+          description="Choose the contacts that should receive this campaign."
+        />
 
         <Form.Item
           label="Audience"
@@ -257,48 +391,42 @@ export default function CreateCampaignModal({
             placeholder="Select an audience"
             loading={audiencesLoading}
             options={audiences.map((audience) => ({
-              label: `${audience.name} (${audience.total_rows} contacts)`,
+              label: `${audience.name} (${audience.total_rows.toLocaleString()} contacts)`,
               value: audience.id,
             }))}
             onChange={(value) => {
               setSelectedAudienceId(value);
 
-              /*
-               * The audience columns may have changed,
-               * so remove any previous mapping.
-               */
               form.setFieldValue("variable_mapping", {});
             }}
           />
         </Form.Item>
 
-        {/* =========================
-            Audience Loading
-        ========================== */}
+        {/* Audience loading */}
 
         {selectedAudienceId && audienceLoading && (
-          <Text type="secondary">Loading audience columns...</Text>
+          <LoadingMessage>Loading audience columns...</LoadingMessage>
         )}
 
-        {/* =========================
+        {/* =====================================================
             Variable Mapping
-        ========================== */}
+        ===================================================== */}
 
         {selectedTemplate && selectedAudience && !audienceLoading && (
-          <div
-            style={{
-              marginTop: 24,
-            }}
-          >
-            <Title level={5}>Variable Mapping</Title>
+          <>
+            <Divider />
 
-            <Text type="secondary">
-              Map each template variable to a column from your audience.
-            </Text>
+            <SectionHeader
+              icon={<CheckCircleOutlined />}
+              title="Variable mapping"
+              description="Connect each template variable to a column in your audience."
+            />
 
             <div
               style={{
-                marginTop: 16,
+                display: "flex",
+                flexDirection: "column",
+                gap: tokens.spaceSM,
               }}
             >
               {selectedTemplate.variables.map((variable) => (
@@ -306,19 +434,38 @@ export default function CreateCampaignModal({
                   key={variable}
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1.5fr",
-                    gap: 16,
-                    alignItems: "start",
+                    gridTemplateColumns:
+                      "minmax(140px, 0.8fr) minmax(200px, 1.5fr)",
+                    gap: tokens.spaceLG,
+                    alignItems: "center",
+
+                    padding: tokens.spaceMD,
+
+                    border: `1px solid ${tokens.border}`,
+                    borderRadius: tokens.radiusMD,
+
+                    background: tokens.surfaceSubtle,
                   }}
                 >
-                  {/* Template variable */}
+                  {/* Variable */}
 
-                  <div
-                    style={{
-                      paddingTop: 8,
-                    }}
-                  >
-                    <Text strong>{`{{ ${variable} }}`}</Text>
+                  <div>
+                    <Tag
+                      style={{
+                        margin: 0,
+
+                        border: `1px solid ${tokens.border}`,
+                        borderRadius: tokens.radiusSM,
+
+                        background: tokens.surface,
+                        color: tokens.inkSecondary,
+
+                        fontFamily: tokens.fontMono,
+                        fontSize: 12,
+                      }}
+                    >
+                      {`{{ ${variable} }}`}
+                    </Tag>
                   </div>
 
                   {/* Audience column */}
@@ -332,7 +479,7 @@ export default function CreateCampaignModal({
                       },
                     ]}
                     style={{
-                      marginBottom: 16,
+                      margin: 0,
                     }}
                   >
                     <Select
@@ -346,28 +493,141 @@ export default function CreateCampaignModal({
                 </div>
               ))}
             </div>
-          </div>
+          </>
         )}
 
-        {/* =========================
+        {/* =====================================================
             Actions
-        ========================== */}
+        ===================================================== */}
 
         <div
           style={{
             display: "flex",
             justifyContent: "flex-end",
-            gap: 12,
-            marginTop: 24,
+            alignItems: "center",
+            gap: tokens.spaceSM,
+
+            marginTop: tokens.spaceXXL,
+            paddingTop: tokens.spaceLG,
+
+            borderTop: `1px solid ${tokens.border}`,
           }}
         >
-          <Button onClick={handleCancel}>Cancel</Button>
+          <Button
+            onClick={handleCancel}
+            style={{
+              borderRadius: tokens.radiusMD,
+            }}
+          >
+            Cancel
+          </Button>
 
-          <Button type="primary" htmlType="submit" loading={isPending}>
-            Create Campaign
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isPending}
+            icon={<SendOutlined />}
+            style={{
+              borderRadius: tokens.radiusMD,
+            }}
+          >
+            Create campaign
           </Button>
         </div>
       </Form>
     </Modal>
+  );
+}
+
+/* =============================================================
+   Reusable Section Header
+============================================================= */
+
+interface SectionHeaderProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
+function SectionHeader({ icon, title, description }: SectionHeaderProps) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: tokens.spaceSM,
+        marginBottom: tokens.spaceLG,
+      }}
+    >
+      <div
+        style={{
+          width: 30,
+          height: 30,
+
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+
+          flexShrink: 0,
+
+          borderRadius: tokens.radiusSM,
+
+          background: tokens.accentSoft,
+          color: tokens.accent,
+        }}
+      >
+        {icon}
+      </div>
+
+      <div>
+        <Text
+          strong
+          style={{
+            display: "block",
+            color: tokens.ink,
+            fontSize: 14,
+          }}
+        >
+          {title}
+        </Text>
+
+        <Text
+          style={{
+            display: "block",
+            marginTop: 2,
+            color: tokens.inkMuted,
+            fontSize: 12,
+            lineHeight: 1.5,
+          }}
+        >
+          {description}
+        </Text>
+      </div>
+    </div>
+  );
+}
+
+/* =============================================================
+   Loading Message
+============================================================= */
+
+function LoadingMessage({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        marginBottom: tokens.spaceLG,
+        padding: `${tokens.spaceSM}px ${tokens.spaceMD}px`,
+
+        border: `1px solid ${tokens.border}`,
+        borderRadius: tokens.radiusSM,
+
+        background: tokens.surfaceSubtle,
+
+        color: tokens.inkMuted,
+        fontSize: 13,
+      }}
+    >
+      {children}
+    </div>
   );
 }

@@ -2,8 +2,8 @@ import { DeleteOutlined, EyeOutlined, TeamOutlined } from "@ant-design/icons";
 import { Button, Card, Empty, Space, Table, Tag, Typography } from "antd";
 import type { TableProps } from "antd";
 
-import { useAudiences } from "#/hooks/audience/useAudiences";
 import { tokens } from "#/components/layout/theme";
+import { useAudiences } from "#/hooks/audience/useAudiences";
 
 const { Text } = Typography;
 
@@ -16,63 +16,84 @@ interface Audience {
 }
 
 const columns: TableProps<Audience>["columns"] = [
+  // ─────────────────────────────────────
+  // Audience
+  // ─────────────────────────────────────
+
   {
     title: "Audience",
     dataIndex: "name",
     key: "name",
-    width: 260,
+    width: 280,
+
     render: (name) => (
-      <Space size={12}>
+      <Space size={tokens.spaceSM}>
         <div
           style={{
-            width: 38,
-            height: 38,
-            borderRadius: 10,
+            width: 40,
+            height: 40,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            flexShrink: 0,
+
+            borderRadius: tokens.radiusMD,
+
             background: tokens.accentSoft,
             color: tokens.accent,
-            flexShrink: 0,
           }}
         >
-          <TeamOutlined />
+          <TeamOutlined style={{ fontSize: 17 }} />
         </div>
 
-        <div>
+        <div
+          style={{
+            minWidth: 0,
+          }}
+        >
           <Text
             strong
             style={{
               display: "block",
               color: tokens.ink,
+              fontSize: 14,
+              lineHeight: 1.5,
             }}
           >
             {name}
           </Text>
 
           <Text
-            type="secondary"
             style={{
+              display: "block",
+              marginTop: 2,
+              color: tokens.inkSubtle,
               fontSize: 12,
+              lineHeight: 1.4,
             }}
-          >
-            Audience
-          </Text>
+          ></Text>
         </div>
       </Space>
     ),
   },
 
+  // ─────────────────────────────────────
+  // Contacts
+  // ─────────────────────────────────────
+
   {
     title: "Contacts",
     dataIndex: "total_rows",
     key: "total_rows",
-    width: 120,
+    width: 140,
+
     render: (totalRows) => (
       <Text
         strong
         style={{
           color: tokens.ink,
+          fontSize: 14,
+          fontVariantNumeric: "tabular-nums",
         }}
       >
         {totalRows.toLocaleString()}
@@ -80,54 +101,84 @@ const columns: TableProps<Audience>["columns"] = [
     ),
   },
 
+  // ─────────────────────────────────────
+  // Columns
+  // ─────────────────────────────────────
+
   {
     title: "Columns",
     dataIndex: "headers",
     key: "headers",
+
     render: (headers: string[]) => (
-      <Space wrap size={[6, 6]}>
+      <Space wrap size={[tokens.spaceXS, tokens.spaceXS]}>
         {headers.length > 0 ? (
           headers.map((header) => (
             <Tag
               key={header}
               style={{
                 margin: 0,
-                borderRadius: 6,
+
                 border: `1px solid ${tokens.border}`,
-                background: tokens.canvas,
-                color: tokens.inkMuted,
-                padding: "3px 8px",
+                borderRadius: tokens.radiusSM,
+
+                background: tokens.surfaceSubtle,
+                color: tokens.inkSecondary,
+
+                padding: "3px 9px",
+
                 fontSize: 12,
+                lineHeight: "18px",
               }}
             >
               {header}
             </Tag>
           ))
         ) : (
-          <Text type="secondary">No columns</Text>
+          <Text
+            style={{
+              color: tokens.inkSubtle,
+              fontSize: 13,
+            }}
+          >
+            No columns
+          </Text>
         )}
       </Space>
     ),
   },
 
+  // ─────────────────────────────────────
+  // Actions
+  // ─────────────────────────────────────
+
   {
     title: "Actions",
     key: "action",
-    width: 150,
+    width: 160,
     align: "right",
+
     render: () => (
-      <Space size={4}>
+      <Space size={tokens.spaceXS}>
         <Button
           type="text"
           icon={<EyeOutlined />}
           style={{
-            color: tokens.inkMuted,
+            color: tokens.inkSecondary,
+            borderRadius: tokens.radiusSM,
           }}
         >
           View
         </Button>
 
-        <Button type="text" danger icon={<DeleteOutlined />}>
+        <Button
+          type="text"
+          danger
+          icon={<DeleteOutlined />}
+          style={{
+            borderRadius: tokens.radiusSM,
+          }}
+        >
           Delete
         </Button>
       </Space>
@@ -141,10 +192,14 @@ const AudienceTable = () => {
   return (
     <Card
       style={{
-        borderRadius: 14,
-        border: `1px solid ${tokens.border}`,
-        boxShadow: tokens.accentSoft,
         overflow: "hidden",
+
+        border: `1px solid ${tokens.border}`,
+        borderRadius: tokens.radiusLG,
+
+        background: tokens.surface,
+
+        boxShadow: tokens.shadowSm,
       }}
       styles={{
         body: {
@@ -160,14 +215,38 @@ const AudienceTable = () => {
         pagination={false}
         locale={{
           emptyText: (
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
-                <Text type="secondary">
-                  No audiences have been uploaded yet.
-                </Text>
-              }
-            />
+            <div
+              style={{
+                padding: `${tokens.spaceXXL}px ${tokens.spaceLG}px`,
+              }}
+            >
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description={
+                  <div>
+                    <Text
+                      strong
+                      style={{
+                        display: "block",
+                        marginBottom: tokens.spaceXS,
+                        color: tokens.ink,
+                      }}
+                    >
+                      No audiences yet
+                    </Text>
+
+                    <Text
+                      style={{
+                        color: tokens.inkMuted,
+                        fontSize: 13,
+                      }}
+                    >
+                      Upload a CSV file to create your first audience.
+                    </Text>
+                  </div>
+                }
+              />
+            </div>
           ),
         }}
         scroll={{

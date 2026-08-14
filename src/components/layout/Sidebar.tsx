@@ -95,17 +95,19 @@ export default function Sidebar({ collapsed }: SidebarProps) {
           />
         </div>
         {!collapsed && (
-          <span
+          <Link
+            to="/app/dashboard"
             style={{
               color: "#fff",
               fontFamily: tokens.fontDisplay,
               fontWeight: 600,
               fontSize: 16,
               letterSpacing: -0.2,
+              textDecoration: "none",
             }}
           >
             Bulk Mail
-          </span>
+          </Link>
         )}
       </div>
 
