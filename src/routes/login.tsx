@@ -12,7 +12,7 @@ export const Route = createFileRoute("/login")({
       });
     } catch (error: any) {
       // User is not logged in → allow login page
-      if (error?.response?.status === 401) {
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
         return;
       }
 

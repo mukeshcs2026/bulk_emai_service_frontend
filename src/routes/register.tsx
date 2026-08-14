@@ -14,7 +14,7 @@ export const Route = createFileRoute("/register")({
       });
     } catch (error: any) {
       // Not authenticated → allow registration page
-      if (error?.response?.status === 401) {
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
         return;
       }
 

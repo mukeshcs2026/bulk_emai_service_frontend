@@ -133,7 +133,7 @@ function RouteComponent() {
                 color: tokens.inkMuted,
               }}
             >
-              <Space direction="vertical" align="center">
+              <Space orientation="vertical" align="center">
                 <SendOutlined
                   style={{
                     fontSize: 28,
@@ -172,7 +172,7 @@ function RouteComponent() {
             }}
           >
             <Space
-              direction="vertical"
+              orientation="vertical"
               size={tokens.spaceLG}
               style={{
                 width: "100%",
@@ -257,7 +257,7 @@ function StatCard({
       }}
     >
       <Space
-        direction="vertical"
+        orientation="vertical"
         size={tokens.spaceSM}
         style={{
           width: "100%",
